@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/startscreen">
+
+    <TextView
+        android:text="#MAGA!  Grab Ivankas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="30sp"
+        android:gravity="center_horizontal" />
+
+    <TextView
+        android:text="Avoid Putins"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="50dp"
+        android:textSize="30sp"
+        android:gravity="center_horizontal" />
+
+    <TextView
+        android:text="Miss 5 Ivankas and LOSE!"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="30sp"
+        android:paddingTop="50dp"
+        android:gravity="center_horizontal" />
+</LinearLayout>

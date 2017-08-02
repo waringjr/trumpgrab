@@ -1,8 +1,9 @@
-package com.jeffreywaring.gameexample;
+package com.jeffreywaring.TrumpGrab;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -11,10 +12,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.List;
 
 
 import java.util.ArrayList;
@@ -38,7 +36,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	public ArrayList<mObject> naps = new ArrayList<mObject>();
 
 	private int screenWidth,screenHeight;
-	private String message = "Catch the bottles, watch out for naps!";
+	private String message = "Grab Ivanka, but watch out for Putins!";
 
 	float bottleYPosition = 900;
 	float bottleXPosition = 100;
@@ -47,6 +45,8 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	float napXPosition = 450;
 
 	private Rectangle rectangleDrew;
+
+	public Sound andrewHappy;
 
 	private class mObject{
 		//An mObject is comprised of two parts: a sprite and a rectangle
@@ -62,9 +62,9 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 
 		public mObject(float initialX, float initialY, boolean isBottle){
 			if(isBottle){
-				mTexture = new Texture("bottle.png");
+				mTexture = new Texture("ivanka.jpg");
 			}else{
-				mTexture = new Texture("nap.jpg");
+				mTexture = new Texture("putins.jpg");
 			}
 			AmIaBottle = isBottle;
 			thisSprite = new Sprite(mTexture);
@@ -102,13 +102,20 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 			mTexture.dispose();
 		}
 	}
+	private AdsController adsController;
+
+	public MyGdxGame(AdsController adsController){
+		this.adsController = adsController;
+	}
 	@Override
 	public void create () {
+
+		adsController.showBannerAd();
 
 		batch = new SpriteBatch();
 
 		//clump the creation of an Andrew sprite here
-		andrew = new Texture("ic_launcher.jpg");
+		andrew = new Texture("Trump_face.jpg");
 		//this takes the raw image, and converts it to a "game" image
 		drew_sprite = new Sprite(andrew);
 		rectangleDrew = new Rectangle(drew_sprite.getX(),drew_sprite.getY(),drew_sprite.getWidth(),drew_sprite.getHeight());
@@ -131,6 +138,13 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		//initial nap
 		nap = new mObject(napXPosition,napYPosition,false);
 		naps.add(nap);
+
+		//Try and load sound here
+		AssetManager assetManager = new AssetManager();
+		assetManager.load("happy.mp3", Sound.class);
+		assetManager.finishLoading(); //Important!
+
+		andrewHappy = Gdx.audio.newSound(Gdx.files.internal("happy.mp3"));
 	}
 
 	@Override
@@ -149,18 +163,22 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 
 		//note: 0,0 corresponds to the bottom left
 		//increase speed as score increases
-			drew_sprite.draw(batch);
 
-			if(misses<3) {
+
+			if(misses<5) {
+
+				drew_sprite.draw(batch);
 
 				font.draw(batch, message, 300, 600);
 				font.draw(batch, "Score = "+String.valueOf(score), screenWidth-400, screenHeight-80);
 				font.draw(batch, "Level = "+String.valueOf(level), screenWidth-400, screenHeight-280);
 
-				if((levelIndicator+1)%3 == 0){
+				if(levelIndicator == 5){
+					andrewHappy.play();
 					levelIndicator = 0;
 					//LEVEL UP difficulty with more bottles
 					level++;
+					speed = speed+2;
 					//speed = speed + 10;
 					mObject bottle;
 					mObject nap;
@@ -185,6 +203,9 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 					score = checkHit(rectangleDrew, naps.get(i), score);
 					checkMiss(naps.get(i), misses);
 				}
+
+			}else{
+				message = "Game over loser";
 			}
 		batch.end();
 
@@ -210,12 +231,12 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 				font.setColor(Color.GREEN);
 				score++;
 				levelIndicator++;
+				resetObject(thisObject);
 			}else{
 				font.setColor(Color.RED);
 				score--;
-				levelIndicator--;
 			}
-			resetObject(thisObject);
+
 		}
 		return score;
 	}
@@ -234,11 +255,6 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 			}
 		}
 		return misses;
-	}
-	public void happySound() {
-		//plays a happy sound when a bottle is captured
-		Sound andrewHappy = Gdx.audio.newSound(Gdx.files.internal("happy.mp4"));
-		andrewHappy.play();
 	}
 
 	public float moveObject(mObject thisObject,float speed){
@@ -302,8 +318,12 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	public void dispose () {
 		batch.dispose();
 		andrew.dispose();
-		bottles.get(0).dispose();
-		naps.get(0).dispose();
+		int numStuff = bottles.size();
+
+		for(int i = 0; i < numStuff; i++) {
+			bottles.get(i).dispose();
+			naps.get(i).dispose();
+		}
 		font.dispose();
 	}
 }
